@@ -1,0 +1,34 @@
+from django import forms
+from .models import Comment, Post
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        # fields = '__all__'
+        fields = ['message']
+        widgets = {
+             'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+         }
+
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['author', 'title', 'content']
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title', '')
+        return title
+
+    def clean_content(self):
+        content = self.cleaned_data.get('content', '')
+        if len(content) % 2 == 0:
+            #raise forms.ValidationError('홀수 길이로 입력하세요')
+            self.add_error('content', '홀수 길이로 입력하세요')
+        content = ''.join(word for word in content.split())
+        return content
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
